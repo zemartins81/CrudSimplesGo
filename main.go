@@ -1,17 +1,20 @@
 package main
 
-import "net/http"
+import (
+	"CrudSimplesGo/controller"
+	"net/http"
+)
 
 func main() {
 
 	// Gerencia as URLs
-	http.HandleFunc("/", Index)
-	http.HandleFunc("/show", Show)
-	http.HandleFunc("/new", New)
+	http.HandleFunc("/", controller.ListAll)
+	http.HandleFunc("/show", controller.ShowOne)
+	http.HandleFunc("/new", add)
 	http.HandleFunc("/edit", Edit)
 
 	// Ações
-	http.HandleFunc("/insert", Insert)
+	http.HandleFunc("/insert", controller.Insert)
 	http.HandleFunc("/update", Update)
 	http.HandleFunc("/delete", Delete)
 

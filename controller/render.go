@@ -2,42 +2,45 @@ package controller
 
 import (
 	"CrudSimplesGo/databases"
-	"CrudSimplesGo/entities"
 	"html/template"
+	"log"
 	"net/http"
 )
 
 var tmpl = template.Must(template.ParseGlob("tmpl/*"))
 
-func Index(w http.ResponseWriter, r *http.Request) {
+func ListAll(w http.ResponseWriter, r *http.Request) {
 
-	db := databases.DBConn()
-	defer db.Close()
-
-	selDB, err := db.Query("SELECT * FROM names ORDER BY id DESC ")
+	users := databases.SelectAll()
+	err := tmpl.ExecuteTemplate(w, "Index", users)
 	if err != nil {
 		panic(err.Error())
 	}
+}
 
-	n := entities.Names{}
+func ShowOne(w http.ResponseWriter, r *http.Request) {
+	requestID := r.URL.Query().Get("id")
 
-	res := []entities.Names{}
+	user := databases.SelectOne(requestID)
 
-	for selDB.Next() {
-		var id int
-		var name, email string
-
-		err = selDB.Scan(&id, &name, &email)
-		if err != nil {
-			panic(err.Error())
-		}
-
-		n.Id = id
-		n.Name = name
-		n.Email = email
-
-		res = append(res, n)
+	err := tmpl.ExecuteTemplate(w, "Show", user)
+	if err != nil {
+		panic(err.Error())
 	}
+}
 
-	tmpl.ExecuteTemplate(w, "Index", res)
+func New(w http.ResponseWriter, r *http.Request) {
+	tmpl.ExecuteTemplate(w, "New", nil)
+}
+
+func Insert(w http.ResponseWriter, r *http.Request) {
+
+	name := r.FormValue("name")
+	email := r.FormValue("email")
+
+	result := databases.InsertOne(name, email)
+	log.Println(result)
+
+	http.Redirect(w, r, "/", 301)
+
 }
